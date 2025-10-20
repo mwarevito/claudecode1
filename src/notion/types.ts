@@ -34,7 +34,7 @@ export interface DailyMIT {
   id: string;
   title: string;
   date: string;
-  status: 'Not Started' | 'In Progress' | 'Done' | 'Blocked';
+  status: 'planned' | 'wip' | 'done' | 'skipped';
   weeklyOutcome?: WeeklyOutcome;
   project?: Project;
   objective?: Objective;

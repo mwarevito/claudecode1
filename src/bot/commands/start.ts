@@ -38,9 +38,9 @@ export async function handleHelp(ctx: Context) {
 
 ✅ Tracking:
 • /status - View today's MITs and status
+• /mits - 🆕 Manage MITs interactively (edit/delete/complete/note)
 • /complete <task> - Mark task as done
 • /progress <task> - Mark as in progress
-• /block <task> - Mark task as blocked
 
 📊 Reporting:
 • /summary - Today's completion summary
@@ -51,9 +51,10 @@ export async function handleHelp(ctx: Context) {
 • /projects - List active projects
 
 💡 Tips:
+- Use /mits for full MIT management with buttons
 - Use task numbers (e.g., /complete 1) for quick actions
+- Click the menu button (☰) to see all commands
 - Tasks link automatically to projects and objectives
-- Daily summaries track your completion rate
 
 Need more help? Visit the GitHub repo or contact support.
   `.trim();

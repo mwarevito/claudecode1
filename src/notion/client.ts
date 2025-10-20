@@ -17,7 +17,7 @@ export class NotionClient {
 
   // Helper to extract title from Notion property
   private extractTitle(properties: any, propertyName: string = 'Name'): string {
-    const prop = properties[propertyName] || properties['Title'] || properties['title'];
+    const prop = properties[propertyName] || properties['Task'] || properties['Outcome'] || properties['Objective '] || properties['Title'] || properties['title'];
     if (!prop) return 'Untitled';
 
     if (prop.title && prop.title.length > 0) {
@@ -60,16 +60,16 @@ export class NotionClient {
       database_id: config.notion.databases.objectives,
       filter: {
         or: [
-          { property: 'Status', select: { equals: 'Active' } },
-          { property: 'Status', select: { equals: 'In Progress' } },
+          { property: 'Priority', select: { equals: 'Core' } },
+          { property: 'Priority', select: { equals: 'Supporting' } },
         ],
       },
     });
 
     return response.results.map((page: any) => ({
       id: page.id,
-      title: this.extractTitle(page.properties),
-      status: this.extractSelect(page.properties, 'Status'),
+      title: this.extractTitle(page.properties, 'Objective '),
+      status: this.extractSelect(page.properties, 'Priority'),
       dueDate: this.extractDate(page.properties, 'Due Date'),
     }));
   }
@@ -78,10 +78,8 @@ export class NotionClient {
   async getProjects(activeOnly: boolean = true): Promise<Project[]> {
     const filter = activeOnly
       ? {
-          or: [
-            { property: 'Status', select: { equals: 'Active' } },
-            { property: 'Status', select: { equals: 'In Progress' } },
-          ],
+          property: 'Status', 
+          select: { equals: 'active' }
         }
       : undefined;
 
@@ -104,22 +102,22 @@ export class NotionClient {
       filter: {
         and: [
           {
-            property: 'Week',
+            property: 'week',
             date: { on_or_after: weekStart },
           },
           {
-            property: 'Week',
+            property: 'week',
             date: { on_or_before: weekEnd },
           },
         ],
       },
-      sorts: [{ property: 'Priority', direction: 'ascending' }],
+      sorts: [{ property: 'Impact', direction: 'ascending' }],
     });
 
     return response.results.map((page: any) => ({
       id: page.id,
-      title: this.extractTitle(page.properties),
-      week: this.extractDate(page.properties, 'Week') || '',
+      title: this.extractTitle(page.properties, 'Outcome'),
+      week: this.extractDate(page.properties, 'week') || '',
       status: this.extractSelect(page.properties, 'Status'),
       priority: this.extractNumber(page.properties, 'Priority'),
     }));
@@ -130,7 +128,7 @@ export class NotionClient {
     const response = await this.client.databases.query({
       database_id: config.notion.databases.dailyMITs,
       filter: {
-        property: 'Date',
+        property: 'Data',
         date: { equals: date },
       },
       sorts: [{ property: 'Priority', direction: 'ascending' }],
@@ -138,9 +136,9 @@ export class NotionClient {
 
     return response.results.map((page: any) => ({
       id: page.id,
-      title: this.extractTitle(page.properties),
-      date: this.extractDate(page.properties, 'Date') || date,
-      status: (this.extractSelect(page.properties, 'Status') as any) || 'Not Started',
+      title: this.extractTitle(page.properties, 'Task'),
+      date: this.extractDate(page.properties, 'Data') || date,
+      status: (this.extractSelect(page.properties, 'Status') as any) || 'planned',
       priority: this.extractNumber(page.properties, 'Priority'),
       estimatedTime: this.extractNumber(page.properties, 'Estimated Time'),
       actualTime: this.extractNumber(page.properties, 'Actual Time'),
@@ -159,13 +157,13 @@ export class NotionClient {
     } = {}
   ): Promise<string> {
     const properties: any = {
-      Name: { title: [{ text: { content: title } }] },
-      Date: { date: { start: date } },
-      Status: { select: { name: 'Not Started' } },
+      Task: { title: [{ text: { content: title } }] },
+      Data: { date: { start: date } },
+      Status: { select: { name: 'planned' } },
     };
 
     if (options.weeklyOutcomeId) {
-      properties['Weekly Outcome'] = {
+      properties['📅 Weekly Outcomes'] = {
         relation: [{ id: options.weeklyOutcomeId }],
       };
     }
@@ -205,7 +203,7 @@ export class NotionClient {
   // Update MIT Progress (with actual time)
   async updateMITProgress(mitId: string, actualTime?: number): Promise<void> {
     const properties: any = {
-      Status: { select: { name: 'In Progress' } },
+      Status: { select: { name: 'wip' } },
     };
 
     if (actualTime !== undefined) {
@@ -221,5 +219,25 @@ export class NotionClient {
   // Get page details (useful for fetching related data)
   async getPage(pageId: string): Promise<any> {
     return await this.client.pages.retrieve({ page_id: pageId });
+  }
+
+  // Archive page (soft delete)
+  async archivePage(pageId: string): Promise<void> {
+    await this.client.pages.update({
+      page_id: pageId,
+      archived: true,
+    });
+  }
+
+  // Add note to MIT
+  async addNoteToMIT(mitId: string, note: string): Promise<void> {
+    await this.client.pages.update({
+      page_id: mitId,
+      properties: {
+        Note: {
+          rich_text: [{ text: { content: note } }],
+        },
+      },
+    });
   }
 }

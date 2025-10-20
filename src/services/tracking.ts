@@ -5,7 +5,7 @@ export class TrackingService {
   constructor(private notionClient: NotionClient) {}
 
   async completeMIT(mitId: string): Promise<void> {
-    await this.notionClient.updateMITStatus(mitId, 'Done');
+    await this.notionClient.updateMITStatus(mitId, 'done');
   }
 
   async updateMITProgress(mitId: string, actualTime?: number): Promise<void> {
@@ -13,7 +13,7 @@ export class TrackingService {
   }
 
   async blockMIT(mitId: string): Promise<void> {
-    await this.notionClient.updateMITStatus(mitId, 'Blocked');
+    await this.notionClient.updateMITStatus(mitId, 'skipped');
   }
 
   async findMITByTitle(title: string, mits: DailyMIT[]): Promise<DailyMIT | null> {
@@ -38,13 +38,13 @@ export class TrackingService {
 
   getStatusEmoji(status: string): string {
     switch (status) {
-      case 'Done':
+      case 'done':
         return '✅';
-      case 'In Progress':
+      case 'wip':
         return '🔄';
-      case 'Blocked':
-        return '🚫';
-      case 'Not Started':
+      case 'skipped':
+        return '⏭️';
+      case 'planned':
       default:
         return '⭕';
     }

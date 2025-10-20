@@ -79,7 +79,7 @@ export class PlanningService {
 
     // Suggest incomplete MITs from today
     const incompleteMITs = todaysMITs.filter(
-      (mit) => mit.status !== 'Done'
+      (mit) => mit.status !== 'done'
     );
     incompleteMITs.forEach((mit) => {
       suggestions.push(`[Carry over] ${mit.title}`);
@@ -88,7 +88,7 @@ export class PlanningService {
     // Suggest from weekly outcomes that aren't done
     const activeMITTitles = new Set(todaysMITs.map((m) => m.title));
     weeklyOutcomes
-      .filter((outcome) => outcome.status !== 'Done')
+      .filter((outcome) => outcome.status !== 'done')
       .slice(0, 3)
       .forEach((outcome) => {
         if (!activeMITTitles.has(outcome.title)) {

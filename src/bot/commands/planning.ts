@@ -72,17 +72,14 @@ export async function handleOutcomeSelection(ctx: Context, outcomeId: string) {
       // Deselect
       const index = selections.indexOf(outcomeId);
       selections.splice(index, 1);
-      await ctx.answerCbQuery('Deselected ✓');
     } else {
       // Select
       selections.push(outcomeId);
-      await ctx.answerCbQuery(`Selected (${selections.length}) ✓`);
     }
 
     userSelections.set(userId, selections);
   } catch (error) {
     console.error('Error in handleOutcomeSelection:', error);
-    await ctx.answerCbQuery('Error');
   }
 }
 

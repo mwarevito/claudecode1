@@ -9,15 +9,15 @@ export class SummaryService {
     const targetDate = date || formatDate(new Date());
     const mits = await this.notionClient.getDailyMITs(targetDate);
 
-    const completed = mits.filter((mit) => mit.status === 'Done').length;
-    const inProgress = mits.filter((mit) => mit.status === 'In Progress').length;
-    const notStarted = mits.filter((mit) => mit.status === 'Not Started').length;
-    const blocked = mits.filter((mit) => mit.status === 'Blocked').length;
+    const completed = mits.filter((mit) => mit.status === 'done').length;
+    const inProgress = mits.filter((mit) => mit.status === 'wip').length;
+    const notStarted = mits.filter((mit) => mit.status === 'planned').length;
+    const blocked = mits.filter((mit) => mit.status === 'skipped').length;
 
     const completionRate = mits.length > 0 ? (completed / mits.length) * 100 : 0;
 
     const achievements = mits
-      .filter((mit) => mit.status === 'Done')
+      .filter((mit) => mit.status === 'done')
       .map((mit) => mit.title);
 
     return {

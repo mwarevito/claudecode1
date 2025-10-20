@@ -56,9 +56,9 @@ export async function handleObjectives(ctx: Context) {
     const message = [
       '🎯 Active Objectives:\n',
       ...objectives.map((obj, i) => {
-        const status = obj.status ? `[${obj.status}]` : '';
+        const priority = obj.status ? `[${obj.status}]` : '';
         const due = obj.dueDate ? `(Due: ${obj.dueDate})` : '';
-        return `${i + 1}. ${status} ${obj.title} ${due}`;
+        return `${i + 1}. ${priority} ${obj.title} ${due}`;
       }),
     ].join('\n');
 

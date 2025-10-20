@@ -78,7 +78,7 @@ export async function handleComplete(ctx: Context) {
 
     // Show updated status
     const updatedMITs = await planningService.getTodaysMITs();
-    const completed = updatedMITs.filter((m) => m.status === 'Done').length;
+    const completed = updatedMITs.filter((m) => m.status === 'done').length;
     const total = updatedMITs.length;
 
     if (completed === total) {
@@ -141,7 +141,6 @@ export async function handleProgress(ctx: Context) {
 export async function handleCompleteCallback(ctx: Context, mitId: string) {
   try {
     await trackingService.completeMIT(mitId);
-    await ctx.answerCbQuery('✅ Marked as complete!');
 
     // Update the message
     const mits = await planningService.getTodaysMITs();
@@ -152,14 +151,12 @@ export async function handleCompleteCallback(ctx: Context, mitId: string) {
     }
   } catch (error) {
     console.error('Error in handleCompleteCallback:', error);
-    await ctx.answerCbQuery('❌ Error');
   }
 }
 
 export async function handleProgressCallback(ctx: Context, mitId: string) {
   try {
     await trackingService.updateMITProgress(mitId);
-    await ctx.answerCbQuery('🔄 Marked as in progress!');
 
     const mits = await planningService.getTodaysMITs();
     const mit = mits.find((m) => m.id === mitId);
@@ -169,6 +166,5 @@ export async function handleProgressCallback(ctx: Context, mitId: string) {
     }
   } catch (error) {
     console.error('Error in handleProgressCallback:', error);
-    await ctx.answerCbQuery('❌ Error');
   }
 }

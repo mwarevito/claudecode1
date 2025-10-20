@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  notion-bot:
+    build: .
+    container_name: notion-telegram-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    # Uncomment if you want to use a volume for logs
+    # volumes:
+    #   - ./logs:/app/logs
+    # Resource limits (optional)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M

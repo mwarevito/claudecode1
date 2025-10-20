@@ -7,7 +7,9 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "check": "node scripts/check-config.js",
+    "test-config": "npm run check && echo '\n✅ Ready to start!'"
   },
   "keywords": ["notion", "telegram", "productivity", "planning"],
   "author": "",

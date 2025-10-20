@@ -20,6 +20,14 @@ import {
   handleObjectives,
   handleProjects,
 } from './commands/reporting';
+import {
+  handleManageMITs,
+  handleMITSelection,
+  handleMITAction,
+  handleMITDelete,
+  handleBackToList,
+  handleNoteInput,
+} from './commands/manage';
 import { createMainMenuKeyboard } from './keyboards';
 
 export class NotionPlannerBot {
@@ -45,6 +53,7 @@ export class NotionPlannerBot {
     this.bot.command('status', handleStatus);
     this.bot.command('complete', handleComplete);
     this.bot.command('progress', handleProgress);
+    this.bot.command('mits', handleManageMITs);
 
     // Reporting commands
     this.bot.command('summary', handleSummary);
@@ -87,11 +96,15 @@ export class NotionPlannerBot {
 
     // Planning callbacks
     this.bot.action(/^select_outcome:(.+)$/, async (ctx) => {
+      await ctx.answerCbQuery();
       const outcomeId = ctx.match[1];
       await handleOutcomeSelection(ctx, outcomeId);
     });
 
-    this.bot.action('done_selecting', handleDoneSelecting);
+    this.bot.action('done_selecting', async (ctx) => {
+      await ctx.answerCbQuery();
+      await handleDoneSelecting(ctx);
+    });
 
     this.bot.action('plan_add_more', async (ctx) => {
       await ctx.answerCbQuery();
@@ -101,13 +114,40 @@ export class NotionPlannerBot {
 
     // Tracking callbacks
     this.bot.action(/^complete:(.+)$/, async (ctx) => {
+      await ctx.answerCbQuery();
       const mitId = ctx.match[1];
       await handleCompleteCallback(ctx, mitId);
     });
 
     this.bot.action(/^progress:(.+)$/, async (ctx) => {
+      await ctx.answerCbQuery();
       const mitId = ctx.match[1];
       await handleProgressCallback(ctx, mitId);
+    });
+
+    // MIT Management callbacks
+    this.bot.action(/^manage_mit:(.+)$/, async (ctx) => {
+      await ctx.answerCbQuery();
+      const mitId = ctx.match[1];
+      await handleMITSelection(ctx, mitId);
+    });
+
+    this.bot.action(/^mit_action:(\w+):(.+)$/, async (ctx) => {
+      await ctx.answerCbQuery();
+      const action = ctx.match[1];
+      const mitId = ctx.match[2];
+      await handleMITAction(ctx, action, mitId);
+    });
+
+    this.bot.action(/^mit_confirm_delete:(.+)$/, async (ctx) => {
+      await ctx.answerCbQuery();
+      const mitId = ctx.match[1];
+      await handleMITDelete(ctx, mitId);
+    });
+
+    this.bot.action('manage_back', async (ctx) => {
+      await ctx.answerCbQuery();
+      await handleBackToList(ctx);
     });
 
     // Cancel action
@@ -147,6 +187,23 @@ export class NotionPlannerBot {
 
       await this.bot.launch();
       console.log('🤖 Bot started successfully!');
+      
+      // Set bot commands for menu button (after launch)
+      await this.bot.telegram.setMyCommands([
+        { command: 'start', description: '🏠 Main menu' },
+        { command: 'plan', description: '📋 Plan today\'s MITs' },
+        { command: 'status', description: '✅ View today\'s MITs' },
+        { command: 'mits', description: '🎯 Manage MITs (interactive)' },
+        { command: 'complete', description: '✅ Mark task complete' },
+        { command: 'progress', description: '🔄 Mark as in progress' },
+        { command: 'summary', description: '📊 Daily summary' },
+        { command: 'week', description: '📈 Weekly summary' },
+        { command: 'objectives', description: '🎯 View objectives' },
+        { command: 'projects', description: '📁 View projects' },
+        { command: 'next', description: '➡️ Plan next day' },
+        { command: 'help', description: '❓ Show help' },
+      ]);
+      console.log('✅ Menu button configured');
       console.log('Press Ctrl+C to stop');
     } catch (error) {
       console.error('Failed to start bot:', error);
